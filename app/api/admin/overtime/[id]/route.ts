@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const overtimeId = params.id;
         const body = await request.json();
 
@@ -148,6 +151,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const overtimeId = params.id;
 
         // Verificar se o registro existe

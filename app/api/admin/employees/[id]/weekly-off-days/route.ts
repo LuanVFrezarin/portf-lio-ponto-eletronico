@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
 // GET - Buscar dias de folga de um funcionário
 export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const offDays = await prisma.employeeWeeklyOffDay.findMany({
             where: { employeeId: params.id },
             orderBy: { dayOfWeek: 'asc' }
@@ -21,6 +24,10 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
 // POST - Adicionar dia de folga
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const { dayOfWeek } = await request.json();
 
         if (typeof dayOfWeek !== 'number' || dayOfWeek < 0 || dayOfWeek > 6) {
@@ -58,6 +65,10 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 // DELETE - Remover dia de folga
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const { dayOfWeek } = await request.json();
 
         await prisma.employeeWeeklyOffDay.delete({

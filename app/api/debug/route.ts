@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 import { format } from 'date-fns';
 
 export async function GET() {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const today = format(new Date(), 'yyyy-MM-dd');
         
         // Debug info

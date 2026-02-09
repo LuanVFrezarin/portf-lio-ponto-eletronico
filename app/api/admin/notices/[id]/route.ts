@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +7,10 @@ export async function PUT(
     { params }: { params: { id: string } }
 ) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         const body = await request.json();
         const { title, content, type, active } = body;
 
@@ -33,6 +36,10 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
+        // Dynamically import Prisma to avoid static analysis issues
+        const { PrismaClient } = await import('@prisma/client');
+        const prisma = new PrismaClient();
+
         await prisma.notice.delete({
             where: { id: params.id }
         });
