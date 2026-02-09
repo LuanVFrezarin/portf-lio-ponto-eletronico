@@ -1,0 +1,11 @@
+Nome,Dept,Role,Email,Phone,CPF,HourlyRate,Address
+João Silva,TI,Desenvolvedor Senior,joao.silva@empresa.com,11999998888,123.456.789-00,75.00,Rua das Flores 123 - Centro
+Maria Santos,RH,Analista de RH,maria.santos@empresa.com,11988887777,234.567.890-11,55.00,Av. Paulista 1000 - Bela Vista
+Carlos Oliveira,Financeiro,Contador,carlos.oliveira@empresa.com,11977776666,345.678.901-22,65.00,Rua Augusta 500 - Consolação
+Ana Costa,Marketing,Designer,ana.costa@empresa.com,11966665555,456.789.012-33,50.00,Rua Oscar Freire 200 - Jardins
+Pedro Souza,TI,DevOps Engineer,pedro.souza@empresa.com,11955554444,567.890.123-44,80.00,Av. Faria Lima 1500 - Pinheiros
+Fernanda Lima,Vendas,Gerente Comercial,fernanda.lima@empresa.com,11944443333,678.901.234-55,70.00,Rua Haddock Lobo 300 - Cerqueira César
+Lucas Pereira,TI,QA Engineer,lucas.pereira@empresa.com,11933332222,789.012.345-66,60.00,Av. Rebouças 800 - Pinheiros
+Juliana Almeida,RH,Recrutadora,juliana.almeida@empresa.com,11922221111,890.123.456-77,45.00,Rua da Consolação 400 - Consolação
+Rafael Mendes,Operações,Coordenador,rafael.mendes@empresa.com,11911110000,901.234.567-88,58.00,Av. Brasil 2000 - Jardim América
+Camila Rocha,Financeiro,Analista Financeiro,camila.rocha@empresa.com,11900009999,012.345.678-99,52.00,Rua Bela Cintra 600 - Consolação
