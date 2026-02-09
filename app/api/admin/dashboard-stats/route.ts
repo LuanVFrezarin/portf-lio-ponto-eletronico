@@ -1,5 +1,8 @@
+import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { format, subDays } from "date-fns";
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {
@@ -37,7 +40,7 @@ export async function GET() {
         const employeeIdsWithRecord = new Set(employeesWithRecordToday.map(r => r.employeeId));
         const absentCount = Math.max(0, employeeCount - employeeIdsWithRecord.size);
 
-        return Response.json({
+        return NextResponse.json({
             employeeCount,
             recordsToday,
             totalRecords,
@@ -47,7 +50,7 @@ export async function GET() {
         });
     } catch (error) {
         console.error('Erro ao buscar stats:', error);
-        return Response.json({
+        return NextResponse.json({
             employeeCount: 0,
             recordsToday: 0,
             totalRecords: 0,
