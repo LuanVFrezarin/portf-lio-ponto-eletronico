@@ -1,4 +1,6 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
+
+export const dynamic = 'force-dynamic';
 import { 
     getCorrectionRequests, 
     createCorrectionRequest, 
@@ -12,11 +14,10 @@ import {
 import { getEmployeeById } from '@/lib/employee-storage';
 
 // GET - Listar todas as solicitações (correções e justificativas)
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type'); // 'corrections' | 'justifications' | null (ambos)
-    const status = searchParams.get('status'); // 'pending' | 'approved' | 'rejected' | null (todos)
-    const employeeId = searchParams.get('employeeId');
+export async function GET(request: NextRequest) {
+    const type = request.nextUrl.searchParams.get('type'); // 'corrections' | 'justifications' | null (ambos)
+    const status = request.nextUrl.searchParams.get('status'); // 'pending' | 'approved' | 'rejected' | null (todos)
+    const employeeId = request.nextUrl.searchParams.get('employeeId');
 
     try {
         let corrections: any[] = [];

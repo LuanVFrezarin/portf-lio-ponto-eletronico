@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
 import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
     try {
-        const { searchParams } = new URL(request.url);
-        const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
+        // Use request.nextUrl to avoid dynamic-server static generation issues
+        const date = request?.nextUrl?.searchParams.get('date') || new Date().toISOString().split('T')[0];
 
         console.log(`[ABSENT API] Buscando ausentes para data: ${date}`);
 

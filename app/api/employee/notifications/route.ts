@@ -1,9 +1,10 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import prisma from '@/lib/prisma';
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const employeeId = searchParams.get('employeeId');
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+    const employeeId = request.nextUrl.searchParams.get('employeeId');
     
     if (!employeeId) {
         return NextResponse.json({ error: 'employeeId é obrigatório' }, { status: 400 });

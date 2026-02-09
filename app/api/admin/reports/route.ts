@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 import prisma from '@/lib/prisma';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const employeeId = searchParams.get('employeeId');
-    const monthStr = searchParams.get('month'); // Expecting YYYY-MM
+import { NextRequest } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+    const employeeId = request.nextUrl.searchParams.get('employeeId');
+    const monthStr = request.nextUrl.searchParams.get('month'); // Expecting YYYY-MM
 
     console.log('[REPORTS API] Parâmetros recebidos:', { employeeId, monthStr, timestamp: new Date().toISOString() });
 

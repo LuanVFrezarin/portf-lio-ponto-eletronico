@@ -68,10 +68,13 @@ export async function POST(request: Request) {
     }
 }
 
-export async function GET(request: Request) {
-    const { searchParams } = new URL(request.url);
-    const employeeId = searchParams.get('employeeId');
-    const date = searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
+import { NextRequest } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: NextRequest) {
+    const employeeId = request.nextUrl.searchParams.get('employeeId');
+    const date = request.nextUrl.searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
 
     if (!employeeId) {
         return NextResponse.json({ error: 'Employee ID is required' }, { status: 400 });
