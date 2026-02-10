@@ -1,0 +1,14 @@
+{
+  "buildCommand": "prisma generate && prisma db push && next build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "env": {
+    "DATABASE_URL": "@database_url"
+  },
+  "functions": {
+    "api/**/*.ts": {
+      "maxDuration": 10,
+      "memory": 1024
+    }
+  }
+}

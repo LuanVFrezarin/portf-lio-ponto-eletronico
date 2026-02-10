@@ -2,13 +2,10 @@ export const dynamic = 'force-dynamic';
 
 import { NextResponse } from "next/server";
 import { format, subDays } from "date-fns";
+import prisma from "@/lib/prisma";
 
 export async function GET() {
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         const today = format(new Date(), 'yyyy-MM-dd');
         const yesterday = format(subDays(new Date(), 1), 'yyyy-MM-dd');
 

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { startOfMonth, endOfMonth, format } from 'date-fns';
-
+import prisma from '@/lib/prisma';
 import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -12,10 +12,6 @@ export async function GET(request: NextRequest) {
     console.log('[REPORTS API] Parâmetros recebidos:', { employeeId, monthStr, timestamp: new Date().toISOString() });
 
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         // Primeiro, vamos verificar quantos registros existem no total
         const totalRecords = await prisma.dailyRecord.count();
         console.log('[REPORTS API] Total de registros no banco:', totalRecords);

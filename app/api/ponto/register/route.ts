@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import { format } from 'date-fns';
-import { getEmployeeById } from '@/lib/employee-storage';
-import { getDailyRecord, createOrUpdateDailyRecord } from '@/lib/records-storage';
+import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
@@ -34,7 +35,9 @@ export async function POST(request: Request) {
         }
 
         // Verificar se o funcionário existe
-        const employee = getEmployeeById(employeeId);
+        const employee = await prisma.employee.findUnique({
+            where: { id: employeeId }
+        });
 
         if (!employee) {
             console.error('[PONTO REGISTER] Funcionário não encontrado:', employeeId);
@@ -45,11 +48,33 @@ export async function POST(request: Request) {
         }
 
         console.log('[PONTO REGISTER] Criando/atualizando registro para:', { employeeId, date: today, type });
-        const record = createOrUpdateDailyRecord({
-            employeeId,
-            date: today,
-            [type]: now,
-        } as any);
+        
+        // Buscar ou criar o registro
+        const existingRecord = await prisma.dailyRecord.findUnique({
+            where: {
+                employeeId_date: {
+                    employeeId,
+                    date: today
+                }
+            }
+        });
+
+        const record = await prisma.dailyRecord.upsert({
+            where: {
+                employeeId_date: {
+                    employeeId,
+                    date: today
+                }
+            },
+            update: {
+                [type]: now,
+            },
+            create: {
+                employeeId,
+                date: today,
+                [type]: now,
+            }
+        });
 
         console.log('[PONTO REGISTER] Registro salvo com sucesso:', record.id);
         return NextResponse.json(record);
@@ -70,8 +95,6 @@ export async function POST(request: Request) {
 
 import { NextRequest } from 'next/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function GET(request: NextRequest) {
     const employeeId = request.nextUrl.searchParams.get('employeeId');
     const date = request.nextUrl.searchParams.get('date') || format(new Date(), 'yyyy-MM-dd');
@@ -81,9 +104,17 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const record = getDailyRecord(employeeId, date);
+        const record = await prisma.dailyRecord.findUnique({
+            where: {
+                employeeId_date: {
+                    employeeId,
+                    date
+                }
+            }
+        });
         return NextResponse.json(record || null);
     } catch (error) {
+        console.error('[PONTO REGISTER GET] Erro ao buscar registro:', error);
         return NextResponse.json({ error: 'Erro ao buscar registros' }, { status: 500 });
     }
 }

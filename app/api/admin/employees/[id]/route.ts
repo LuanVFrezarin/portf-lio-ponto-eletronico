@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
-import { getEmployeeById, updateEmployee, deleteEmployee } from '@/lib/employee-storage';
+import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 export async function PUT(
     request: Request,
@@ -9,17 +11,20 @@ export async function PUT(
         const body = await request.json();
         const { name, dept, role, email, phone, cpf, address, hourlyRate } = body;
 
-        const employee = updateEmployee(params.id, {
-            name,
-            dept,
-            role,
-            email,
-            phone,
-            cpf,
-            address,
-            hourlyRate: hourlyRate ? parseFloat(hourlyRate) : 0,
-            avatar: name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
-        } as any);
+        const employee = await prisma.employee.update({
+            where: { id: params.id },
+            data: {
+                name,
+                dept,
+                role,
+                email,
+                phone,
+                cpf,
+                address,
+                hourlyRate: hourlyRate ? parseFloat(hourlyRate) : 0,
+                avatar: name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2),
+            }
+        });
 
         return NextResponse.json(employee);
     } catch (error: any) {
@@ -33,13 +38,17 @@ export async function DELETE(
     { params }: { params: { id: string } }
 ) {
     try {
-        const employee = getEmployeeById(params.id);
+        const employee = await prisma.employee.findUnique({
+            where: { id: params.id }
+        });
 
         if (!employee) {
             return NextResponse.json({ error: 'Funcionário não encontrado' }, { status: 404 });
         }
 
-        deleteEmployee(params.id);
+        await prisma.employee.delete({
+            where: { id: params.id }
+        });
 
         return NextResponse.json({ message: 'Funcionário excluído com sucesso' });
     } catch (error) {

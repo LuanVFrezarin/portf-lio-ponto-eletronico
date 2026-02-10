@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 // POST - Login do admin
 export async function POST(request: Request) {
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         const { username, password } = await request.json();
 
         if (!username || !password) {
@@ -98,10 +95,6 @@ export async function GET(request: Request) {
     const token = authHeader.split(' ')[1];
 
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         const decoded = Buffer.from(token, 'base64').toString('utf-8');
         const [adminId] = decoded.split(':');
 

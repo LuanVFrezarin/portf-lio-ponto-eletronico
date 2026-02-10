@@ -1,13 +1,10 @@
 export const dynamic = 'force-dynamic';
 
 import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         // Use request.nextUrl to avoid dynamic-server static generation issues
         const date = request?.nextUrl?.searchParams.get('date') || new Date().toISOString().split('T')[0];
 

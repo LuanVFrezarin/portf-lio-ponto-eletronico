@@ -1,17 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
-import { 
-    getCorrectionRequests, 
-    createCorrectionRequest, 
-    updateCorrectionRequest,
-    getJustificationRequests,
-    createJustificationRequest,
-    updateJustificationRequest,
-    createOrUpdateDailyRecord,
-    getDailyRecord
-} from '@/lib/records-storage';
-import { getEmployeeById } from '@/lib/employee-storage';
 
 // GET - Listar todas as solicitações (correções e justificativas)
 export async function GET(request: NextRequest) {
@@ -24,32 +14,56 @@ export async function GET(request: NextRequest) {
         let justifications: any[] = [];
 
         if (!type || type === 'corrections') {
-            corrections = getCorrectionRequests().filter(c => {
-                if (status && c.status !== status) return false;
-                if (employeeId && c.employeeId !== employeeId) return false;
-                return true;
+            const where: any = {};
+            if (status) where.status = status;
+            if (employeeId) where.employeeId = employeeId;
+
+            corrections = await prisma.correctionRequest.findMany({
+                where,
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             });
-            corrections = corrections.map(c => ({
-                ...c,
-                employee: getEmployeeById(c.employeeId)
-            }));
         }
 
         if (!type || type === 'justifications') {
-            justifications = getJustificationRequests().filter(j => {
-                if (status && j.status !== status) return false;
-                if (employeeId && j.employeeId !== employeeId) return false;
-                return true;
+            const where: any = {};
+            if (status) where.status = status;
+            if (employeeId) where.employeeId = employeeId;
+
+            justifications = await prisma.justificationRequest.findMany({
+                where,
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
             });
-            justifications = justifications.map(j => ({
-                ...j,
-                employee: getEmployeeById(j.employeeId)
-            }));
         }
 
         return NextResponse.json({ corrections, justifications });
     } catch (error) {
-        console.error(error);
+        console.error('[REQUESTS API] Erro ao buscar solicitações:', error);
         return NextResponse.json({ error: 'Erro ao buscar solicitações' }, { status: 500 });
     }
 }
@@ -61,34 +75,76 @@ export async function POST(request: Request) {
         const { type, employeeId, date, reason, requestedTime, correctionType } = body;
 
         if (type === 'correction') {
-            const correction = createCorrectionRequest({
-                employeeId,
-                date,
-                type: correctionType,
-                requestedTime: requestedTime || '',
-                reason,
-                status: 'pending'
+            const correction = await prisma.correctionRequest.create({
+                data: {
+                    employeeId,
+                    date,
+                    type: correctionType,
+                    requestedTime: requestedTime || '',
+                    reason,
+                    status: 'pending'
+                },
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                }
             });
-            return NextResponse.json({
-                ...correction,
-                employee: getEmployeeById(correction.employeeId)
+
+            // Criar notificação para o funcionário
+            await prisma.employeeNotification.create({
+                data: {
+                    employeeId,
+                    title: "Solicitação de Correção Enviada",
+                    message: `Sua solicitação de correção de ponto para ${date} foi enviada para análise.`,
+                    type: "info"
+                }
             });
+
+            return NextResponse.json(correction);
         } else if (type === 'justification') {
-            const justification = createJustificationRequest({
-                employeeId,
-                date,
-                reason,
-                status: 'pending'
+            const justification = await prisma.justificationRequest.create({
+                data: {
+                    employeeId,
+                    date,
+                    reason,
+                    status: 'pending'
+                },
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                }
             });
-            return NextResponse.json({
-                ...justification,
-                employee: getEmployeeById(justification.employeeId)
+
+            // Criar notificação para o funcionário
+            await prisma.employeeNotification.create({
+                data: {
+                    employeeId,
+                    title: "Solicitação de Justificativa Enviada",
+                    message: `Sua solicitação de justificativa para ${date} foi enviada para análise.`,
+                    type: "info"
+                }
             });
+
+            return NextResponse.json(justification);
         }
 
         return NextResponse.json({ error: 'Tipo inválido' }, { status: 400 });
     } catch (error) {
-        console.error(error);
+        console.error('[REQUESTS API] Erro ao criar solicitação:', error);
         return NextResponse.json({ error: 'Erro ao criar solicitação' }, { status: 500 });
     }
 }
@@ -104,73 +160,111 @@ export async function PATCH(request: Request) {
         }
 
         if (type === 'correction') {
-            const updated = updateCorrectionRequest(id, { 
-                status, 
-                adminComment: adminComment || undefined 
-            } as any);
+            const updated = await prisma.correctionRequest.update({
+                where: { id },
+                data: { 
+                    status, 
+                    adminComment: adminComment || undefined 
+                },
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                }
+            });
 
             // Se aprovado, aplicar a correção no registro real
             if (status === 'approved') {
-                applyCorrection(updated);
+                await applyCorrection(updated);
             }
 
-            return NextResponse.json({
-                ...updated,
-                employee: getEmployeeById(updated.employeeId)
+            // Criar notificação para o funcionário
+            const statusMsg = status === 'approved' ? 'aprovada' : 'rejeitada';
+            await prisma.employeeNotification.create({
+                data: {
+                    employeeId: updated.employeeId,
+                    title: `Solicitação de Correção ${statusMsg.charAt(0).toUpperCase() + statusMsg.slice(1)}`,
+                    message: `Sua solicitação de correção de ponto para ${updated.date} foi ${statusMsg}.${adminComment ? ` Comentário: ${adminComment}` : ''}`,
+                    type: status === 'approved' ? 'success' : 'error'
+                }
             });
-        } else if (type === 'justification') {
-            const updated = updateJustificationRequest(id, { 
-                status, 
-                adminComment: adminComment || undefined 
-            } as any);
 
-            return NextResponse.json({
-                ...updated,
-                employee: getEmployeeById(updated.employeeId)
+            return NextResponse.json(updated);
+        } else if (type === 'justification') {
+            const updated = await prisma.justificationRequest.update({
+                where: { id },
+                data: { 
+                    status, 
+                    adminComment: adminComment || undefined 
+                },
+                include: {
+                    employee: {
+                        select: {
+                            id: true,
+                            name: true,
+                            dept: true,
+                            role: true,
+                            email: true
+                        }
+                    }
+                }
             });
+
+            // Criar notificação para o funcionário
+            const statusMsg = status === 'approved' ? 'aprovada' : 'rejeitada';
+            await prisma.employeeNotification.create({
+                data: {
+                    employeeId: updated.employeeId,
+                    title: `Solicitação de Justificativa ${statusMsg.charAt(0).toUpperCase() + statusMsg.slice(1)}`,
+                    message: `Sua solicitação de justificativa para ${updated.date} foi ${statusMsg}.${adminComment ? ` Comentário: ${adminComment}` : ''}`,
+                    type: status === 'approved' ? 'success' : 'error'
+                }
+            });
+
+            return NextResponse.json(updated);
         }
 
         return NextResponse.json({ error: 'Tipo inválido' }, { status: 400 });
     } catch (error) {
-        console.error(error);
+        console.error('[REQUESTS API] Erro ao atualizar solicitação:', error);
         return NextResponse.json({ error: 'Erro ao atualizar solicitação' }, { status: 500 });
     }
 }
 
 // Função para aplicar correção no registro real
-function applyCorrection(correction: any) {
+async function applyCorrection(correction: any) {
     try {
         const { date, type, requestedTime, employeeId } = correction;
         
         // Converter requestedTime para DateTime
         const timeAsDate = new Date(`${date}T${requestedTime}`);
         
-        // Buscar o registro do dia
-        let record = getDailyRecord(employeeId, date);
-
-        // Se não existe, criar
-        if (!record) {
-            const createData: any = {
+        // Atualizar ou criar o registro do dia
+        await prisma.dailyRecord.upsert({
+            where: {
+                employeeId_date: {
+                    employeeId,
+                    date
+                }
+            },
+            update: {
+                [type]: timeAsDate
+            },
+            create: {
                 employeeId,
                 date,
-                entry: undefined,
-                lunchStart: undefined,
-                lunchEnd: undefined,
-                exit: undefined,
-            };
-            createData[type] = timeAsDate;
-            
-            createOrUpdateDailyRecord(createData);
-        } else {
-            // Atualizar o campo específico
-            const updateData: any = {
-                ...record,
                 [type]: timeAsDate
-            };
-            
-            createOrUpdateDailyRecord(updateData);
-        }
+            }
+        });
+
+        console.log(`[REQUESTS API] Correção aplicada: ${type} em ${date} para employeeId ${employeeId}`);
     } catch (error) {
-        console.error('Erro ao aplicar correção:', error);
+        console.error('[REQUESTS API] Erro ao aplicar correção:', error);
     }
 }

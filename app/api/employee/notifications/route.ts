@@ -1,4 +1,5 @@
 import { NextResponse, NextRequest } from 'next/server';
+import prisma from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,10 +11,6 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         const notifications = await prisma.employeeNotification.findMany({
             where: { employeeId },
             orderBy: { createdAt: 'desc' }
@@ -28,10 +25,6 @@ export async function GET(request: NextRequest) {
 
 export async function PATCH(request: Request) {
     try {
-        // Dynamically import Prisma to avoid static analysis issues
-        const { PrismaClient } = await import('@prisma/client');
-        const prisma = new PrismaClient();
-
         const body = await request.json();
         const { id, read } = body;
 

@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
-import { getEmployeeByPin } from '@/lib/employee-storage';
+import prisma from '@/lib/prisma';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {
         const { pin } = await request.json();
 
-        const employee = getEmployeeByPin(pin);
+        const employee = await prisma.employee.findUnique({
+            where: { pin }
+        });
 
         if (!employee) {
             return NextResponse.json({ error: 'PIN inválido' }, { status: 401 });
@@ -13,6 +17,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json(employee);
     } catch (error) {
+        console.error('[LOGIN] Erro ao autenticar:', error);
         return NextResponse.json({ error: 'Erro ao autenticar' }, { status: 500 });
     }
 }
