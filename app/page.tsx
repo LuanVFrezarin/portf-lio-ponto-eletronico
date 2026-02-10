@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { UserCircle, LogIn, Coffee, LogOut, Loader2, Clock, Calendar, TrendingUp, FileSpreadsheet, ChevronRight, AlertCircle, CheckCircle2, History, FileText, MessageSquare, X, Send, ChevronLeft, ArrowDownToLine, Shield, Bell } from "lucide-react";
+import { UserCircle, LogIn, Coffee, LogOut, Loader2, Clock, Calendar, TrendingUp, FileSpreadsheet, ChevronRight, AlertCircle, CheckCircle2, History, FileText, MessageSquare, X, Send, ChevronLeft, ArrowDownToLine, Users, Shield, Bell } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
@@ -605,14 +605,16 @@ export default function PontoPage() {
                         </form>
                     </div>
 
-                    {/* Link para Admin */}
+                    {/* Acesso Administrativo / Recrutador - destacado */}
                     <div className="mt-6 text-center">
                         <Link
                             href="/admin/login"
-                            className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white rounded-xl font-semibold shadow-lg shadow-purple-500/25 transition-all transform hover:scale-105"
+                            className="inline-flex items-center justify-center w-full md:w-auto mx-auto gap-3 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-500 hover:from-purple-500 hover:to-pink-400 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 transition-colors"
+                            aria-label="Acesso administrativo e recrutador"
                         >
                             <Shield className="w-5 h-5" />
-                            Acesso Administrativo / Recrutador
+                            <Users className="w-5 h-5" />
+                            Acesso administrativo / recrutador
                         </Link>
                     </div>
                 </div>

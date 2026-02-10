@@ -74,10 +74,6 @@ export default function ReportsPage() {
             setLoading(false);
         }
     };
-        } finally {
-            setLoading(false);
-        }
-    };
 
     useEffect(() => {
         fetchEmployees();
