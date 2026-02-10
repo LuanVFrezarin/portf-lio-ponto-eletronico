@@ -30,10 +30,16 @@ export default function ReportsPage() {
     const fetchEmployees = async () => {
         try {
             const res = await fetch("/api/admin/employees");
+            if (!res.ok) {
+                console.error('Erro na resposta da API de funcionários:', res.status, res.statusText);
+                setEmployees([]);
+                return;
+            }
             const data = await res.json();
-            setEmployees(data);
+            setEmployees(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Erro ao carregar funcionários");
+            console.error("Erro ao carregar funcionários:", error);
+            setEmployees([]);
         }
     };
 
@@ -47,6 +53,11 @@ export default function ReportsPage() {
             console.log('[REPORTS PAGE] Buscando com URL:', url.toString());
 
             const res = await fetch(url.toString());
+            if (!res.ok) {
+                console.error('Erro na resposta da API de relatórios:', res.status, res.statusText);
+                setRecords([]);
+                return;
+            }
             const data = await res.json();
             
             console.log('[REPORTS PAGE] Dados recebidos:', {
@@ -54,10 +65,15 @@ export default function ReportsPage() {
                 data: data
             });
             
-            setRecords(data || []);
+            setRecords(Array.isArray(data) ? data : []);
         } catch (error) {
             console.error('[REPORTS PAGE] Erro:', error);
             toast.error("Erro ao carregar relatórios");
+            setRecords([]);
+        } finally {
+            setLoading(false);
+        }
+    };
         } finally {
             setLoading(false);
         }

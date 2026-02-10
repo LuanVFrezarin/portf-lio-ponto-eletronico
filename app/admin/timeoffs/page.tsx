@@ -80,13 +80,18 @@ export default function TimeOffManagementPage() {
         try {
             setLoading(true);
             const response = await fetch('/api/admin/timeoffs');
-            if (!response.ok) throw new Error('Erro ao buscar folgas');
+            if (!response.ok) {
+                console.error('Erro na resposta da API de folgas:', response.status, response.statusText);
+                setTimeOffs([]);
+                return;
+            }
             
             const data = await response.json();
             setTimeOffs(data.timeOffs || []);
         } catch (error) {
             console.error('Erro:', error);
             toast.error('Erro ao carregar folgas');
+            setTimeOffs([]);
         } finally {
             setLoading(false);
         }

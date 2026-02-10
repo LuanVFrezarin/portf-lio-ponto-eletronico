@@ -68,11 +68,20 @@ export default function ApprovalsPage() {
         setLoading(true);
         try {
             const res = await fetch('/api/requests');
+            if (!res.ok) {
+                console.error('Erro na resposta da API de solicitações:', res.status, res.statusText);
+                setCorrections([]);
+                setJustifications([]);
+                return;
+            }
             const data = await res.json();
             setCorrections(data.corrections || []);
             setJustifications(data.justifications || []);
         } catch (error) {
+            console.error('Erro ao carregar solicitações:', error);
             toast.error('Erro ao carregar solicitações');
+            setCorrections([]);
+            setJustifications([]);
         } finally {
             setLoading(false);
         }

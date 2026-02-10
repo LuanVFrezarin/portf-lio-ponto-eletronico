@@ -64,13 +64,18 @@ export default function OvertimeManagementPage() {
         try {
             setLoading(true);
             const response = await fetch('/api/admin/overtime');
-            if (!response.ok) throw new Error('Erro ao buscar horas extras');
+            if (!response.ok) {
+                console.error('Erro na resposta da API de horas extras:', response.status, response.statusText);
+                setOvertimes([]);
+                return;
+            }
             
             const data = await response.json();
             setOvertimes(data.overtimes || []);
         } catch (error) {
             console.error('Erro:', error);
             toast.error('Erro ao carregar horas extras');
+            setOvertimes([]);
         } finally {
             setLoading(false);
         }
