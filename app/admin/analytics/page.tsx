@@ -75,6 +75,16 @@ export default function AnalyticsPage() {
                 fetch('/api/admin/employees')
             ]);
 
+            if (!recordsRes.ok || !employeesRes.ok) {
+                console.error('[ANALYTICS] Erro nas respostas das APIs:', {
+                    records: recordsRes.status,
+                    employees: employeesRes.status
+                });
+                setRecords([]);
+                setEmployees([]);
+                return;
+            }
+
             const recordsData = await recordsRes.json();
             const employeesData = await employeesRes.json();
 
@@ -86,12 +96,14 @@ export default function AnalyticsPage() {
                 count: Array.isArray(employeesData) ? employeesData.length : 0
             });
 
-            setRecords(recordsData || []);
-            setEmployees(employeesData || []);
+            setRecords(Array.isArray(recordsData) ? recordsData : []);
+            setEmployees(Array.isArray(employeesData) ? employeesData : []);
 
-            calculateStats(recordsData || [], employeesData || []);
+            calculateStats(Array.isArray(recordsData) ? recordsData : [], Array.isArray(employeesData) ? employeesData : []);
         } catch (error) {
             console.error("[ANALYTICS] Erro ao carregar dados:", error);
+            setRecords([]);
+            setEmployees([]);
         } finally {
             setLoading(false);
         }

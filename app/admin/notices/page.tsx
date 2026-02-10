@@ -28,10 +28,17 @@ export default function NoticesPage() {
     const fetchNotices = async () => {
         try {
             const res = await fetch("/api/admin/notices");
+            if (!res.ok) {
+                console.error('Erro na resposta da API de avisos:', res.status, res.statusText);
+                setNotices([]);
+                return;
+            }
             const data = await res.json();
-            setNotices(data);
+            setNotices(Array.isArray(data) ? data : []);
         } catch (error) {
+            console.error("Erro ao carregar avisos:", error);
             toast.error("Erro ao carregar avisos");
+            setNotices([]);
         } finally {
             setLoading(false);
         }
