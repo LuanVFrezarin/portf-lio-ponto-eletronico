@@ -81,10 +81,16 @@ export default function EmployeesPage() {
     const fetchWeeklyOffDays = async (employeeId: string) => {
         try {
             const res = await fetch(`/api/admin/employees/${employeeId}/weekly-off-days`);
+            if (!res.ok) {
+                console.error('Erro na resposta da API:', res.status, res.statusText);
+                setWeeklyOffDays([]);
+                return;
+            }
             const data = await res.json();
             setWeeklyOffDays(data);
         } catch (error) {
             console.error('Erro ao buscar folgas:', error);
+            setWeeklyOffDays([]);
         }
     };
 

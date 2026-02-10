@@ -50,11 +50,25 @@ export default function AdminLayout({
     const fetchNotifications = async () => {
         try {
             const res = await fetch("/api/admin/notices");
+            if (!res.ok) {
+                console.error('Erro na resposta da API de notificações:', res.status, res.statusText);
+                setNotifications([]);
+                setUnreadCount(0);
+                return;
+            }
             const data = await res.json();
-            setNotifications(data);
-            setUnreadCount(data.length);
+            if (Array.isArray(data)) {
+                setNotifications(data);
+                setUnreadCount(data.length);
+            } else {
+                console.error('Dados de notificações inválidos:', data);
+                setNotifications([]);
+                setUnreadCount(0);
+            }
         } catch (error) {
             console.error("Erro ao buscar notificações:", error);
+            setNotifications([]);
+            setUnreadCount(0);
         }
     };
 
